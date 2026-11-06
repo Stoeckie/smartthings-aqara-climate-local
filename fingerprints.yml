@@ -1,0 +1,11 @@
+zigbeeManufacturer:
+  - id: "LUMI/lumi.sensor_ht.agl02"
+    deviceLabel: Aqara Temperature and Humidity Sensor T1
+    manufacturer: LUMI
+    model: lumi.sensor_ht.agl02
+    deviceProfileName: aqara-climate
+  - id: "LUMI/lumi.weather"
+    deviceLabel: Aqara Temperature and Humidity Sensor
+    manufacturer: LUMI
+    model: lumi.weather
+    deviceProfileName: aqara-climate
