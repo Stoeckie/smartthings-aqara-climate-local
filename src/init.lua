@@ -10,7 +10,7 @@ local data_types = require "st.zigbee.data_types"
 local log = require "log"
 local tlv = require "aqara_tlv"
 
-local BUILD = "2026-11-07a"
+local BUILD = "2026-11-07b"
 local PRIVATE_CLUSTER = 0xFCC0
 local PRIVATE_ATTR_MODE = 0x0009
 local PRIVATE_ATTR_REPORT = 0x00F7
@@ -39,6 +39,8 @@ local function pressure_handler(_driver, device, value, _zb_rx)
 end
 
 local function voltage_handler(_driver, device, value, _zb_rx)
+  -- the power cluster only has 0.1 V steps; the Aqara report is exact, so use this only without recent Aqara reports
+  if os.time() - (device:get_field("aqara_report_at") or 0) < 3 * 3600 then return end
   emit_battery(device, (tonumber(value.value) or 0) * 100, "power cluster")
 end
 
@@ -46,7 +48,15 @@ local function private_handler(_driver, device, value, _zb_rx)
   local raw = value and value.value
   if type(raw) ~= "string" then return end
   local rec = tlv.parse(raw)
-  if rec[0x01] then emit_battery(device, rec[0x01], "Aqara report") end
+  if rec[0x01] then
+    device:set_field("aqara_report_at", os.time())
+    emit_battery(device, rec[0x01], "Aqara report")
+  end
+  -- the same report carries the pressure in hPa (tag 0x66); the sensor rarely sends a separate pressure report
+  local kpa = rec[0x66] and tlv.pressure_kpa(rec[0x66])
+  if kpa and kpa > 30 and kpa < 120 then
+    device:emit_event(capabilities.atmosphericPressureMeasurement.atmosphericPressure({ value = kpa, unit = "kPa" }))
+  end
 end
 
 local function refresh(_driver, device)

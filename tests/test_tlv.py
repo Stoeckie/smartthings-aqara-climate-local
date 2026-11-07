@@ -23,3 +23,13 @@ def test_battery_and_pressure():
     assert t.battery_percent(2900) == 75 and t.battery_percent(3200) == 100 and t.battery_percent(2400) == 0
     assert t.battery_percent(0) is None
     assert t.pressure_kpa(1023) == 102.3
+
+
+def test_real_t1_report():
+    """Report captured from a T1 on a hub (7-11-2026): battery 2957 mV, 16.38 C, 78.59 %, 1023 hPa."""
+    lua = runtime()
+    t = req(lua, "aqara_tlv")
+    raw = bytes.fromhex("01218d0b032810042 1a84305210d000624050000000008211d010a21a4790c2001642966066529b31e6629ff03".replace(" ", ""))
+    rec = t.parse(raw)
+    assert rec[1] == 2957 and rec[0x64] == 1638 and rec[0x65] == 7859 and rec[0x66] == 1023
+    assert t.pressure_kpa(rec[0x66]) == 102.3 and t.battery_percent(rec[1]) == 89

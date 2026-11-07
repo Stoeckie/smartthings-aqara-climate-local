@@ -9,8 +9,8 @@ SmartThings Edge driver for the Aqara temperature and humidity sensors that also
 
 ## What you get
 * Temperature and humidity, with the standard offset settings
-* Air pressure (`atmosphericPressureMeasurement`, kPa)
-* Battery as a percentage: 2.6 V is empty and 3.0 V is full. It is read from the Aqara report the sensor sends about once an hour.
+* Air pressure (`atmosphericPressureMeasurement`, kPa), from the pressure reports and the hourly Aqara report
+* Battery as a percentage: 2.6 V is empty and 3.0 V is full. It is read from the Aqara report the sensor sends about once an hour (exact to the mV). The 0.1 V steps of the standard battery report are only used when that report is missing.
 * Refresh
 * Everything works in routines
 
