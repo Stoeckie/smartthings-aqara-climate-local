@@ -33,3 +33,5 @@ def test_real_t1_report():
     rec = t.parse(raw)
     assert rec[1] == 2957 and rec[0x64] == 1638 and rec[0x65] == 7859 and rec[0x66] == 1023
     assert t.pressure_kpa(rec[0x66]) == 102.3 and t.battery_percent(rec[1]) == 89
+    assert t.temperature_c(rec[0x64]) == 16.4 and t.humidity_pct(rec[0x65]) == 78.6
+    assert t.temperature_c(-126) == -1.3 and t.humidity_pct(None) is None and t.temperature_c(9000) is None

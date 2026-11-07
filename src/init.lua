@@ -10,7 +10,7 @@ local data_types = require "st.zigbee.data_types"
 local log = require "log"
 local tlv = require "aqara_tlv"
 
-local BUILD = "2026-11-07b"
+local BUILD = "2026-11-07c"
 local PRIVATE_CLUSTER = 0xFCC0
 local PRIVATE_ATTR_MODE = 0x0009
 local PRIVATE_ATTR_REPORT = 0x00F7
@@ -52,7 +52,12 @@ local function private_handler(_driver, device, value, _zb_rx)
     device:set_field("aqara_report_at", os.time())
     emit_battery(device, rec[0x01], "Aqara report")
   end
-  -- the same report carries the pressure in hPa (tag 0x66); the sensor rarely sends a separate pressure report
+  -- the same hourly report carries exact temperature (0.01 C) and humidity (0.01 %); the normal reports only come
+  -- after a change of 0.5 C or 6 %, so these keep the values precise
+  local c, rh = tlv.temperature_c(rec[0x64]), tlv.humidity_pct(rec[0x65])
+  if c then device:emit_event(capabilities.temperatureMeasurement.temperature({ value = c, unit = "C" })) end
+  if rh then device:emit_event(capabilities.relativeHumidityMeasurement.humidity(rh)) end
+  -- and the pressure in hPa (tag 0x66); the sensor rarely sends a separate pressure report
   local kpa = rec[0x66] and tlv.pressure_kpa(rec[0x66])
   if kpa and kpa > 30 and kpa < 120 then
     device:emit_event(capabilities.atmosphericPressureMeasurement.atmosphericPressure({ value = kpa, unit = "kPa" }))

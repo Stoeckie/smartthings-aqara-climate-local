@@ -8,7 +8,7 @@ SmartThings Edge driver for the Aqara temperature and humidity sensors that also
 | Aqara Temperature and Humidity Sensor (WSDCGQ11LM) | lumi.weather |
 
 ## What you get
-* Temperature and humidity, with the standard offset settings
+* Temperature and humidity, with the standard offset settings. The sensor itself only reports after a change of 0.5 °C or 6 %; the driver also takes the exact values (0.1 °C, 0.1 %) from the hourly Aqara report
 * Air pressure (`atmosphericPressureMeasurement`, kPa), from the pressure reports and the hourly Aqara report
 * Battery as a percentage: 2.6 V is empty and 3.0 V is full. It is read from the Aqara report the sensor sends about once an hour (exact to the mV). The 0.1 V steps of the standard battery report are only used when that report is missing.
 * Refresh

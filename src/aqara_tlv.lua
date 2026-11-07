@@ -45,4 +45,18 @@ function M.pressure_kpa(measured)
   return math.floor(measured + 0.5) / 10
 end
 
+--- Temperature from tag 0x64 (0.01 C), one decimal; nil when missing or not plausible.
+function M.temperature_c(v)
+  v = tonumber(v)
+  if not v or v < -4000 or v > 8500 then return nil end
+  return math.floor(v / 10 + 0.5) / 10
+end
+
+--- Humidity from tag 0x65 (0.01 %), one decimal.
+function M.humidity_pct(v)
+  v = tonumber(v)
+  if not v or v < 0 or v > 10000 then return nil end
+  return math.floor(v / 10 + 0.5) / 10
+end
+
 return M
