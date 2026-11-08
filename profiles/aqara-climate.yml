@@ -8,6 +8,8 @@ components:
         version: 1
       - id: atmosphericPressureMeasurement
         version: 1
+      - id: silvervalley08660.pressureTrend
+        version: 1
       - id: battery
         version: 1
       - id: refresh
@@ -19,3 +21,12 @@ preferences:
     explicit: true
   - preferenceId: humidityOffset
     explicit: true
+  - name: "stormDrop"
+    title: "Storm alert: pressure drop in 3 hours (hPa)"
+    description: "Alert goes to storm when the pressure falls at least this much in 3 hours. 3.6 = falling quickly in marine forecasts."
+    required: false
+    preferenceType: number
+    definition:
+      minimum: 1
+      maximum: 20
+      default: 3.6

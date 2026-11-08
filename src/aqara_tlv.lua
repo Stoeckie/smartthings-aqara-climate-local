@@ -45,6 +45,15 @@ function M.pressure_kpa(measured)
   return math.floor(measured + 0.5) / 10
 end
 
+--- Pressure in kPa from the ZCL ScaledValue: hPa = ScaledValue x 10^Scale (T1: 10234 with Scale -1 = 1023.4 hPa).
+function M.scaled_kpa(scaled, scale)
+  scaled = tonumber(scaled)
+  if not scaled then return nil end
+  local hpa = scaled * 10 ^ (tonumber(scale) or -1)
+  if hpa < 300 or hpa > 1200 then return nil end
+  return math.floor(hpa * 10 + 0.5) / 100
+end
+
 --- Temperature from tag 0x64 (0.01 C), one decimal; nil when missing or not plausible.
 function M.temperature_c(v)
   v = tonumber(v)

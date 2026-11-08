@@ -1,6 +1,6 @@
 name: "Aqara Climate Sensor (local)"
 packageKey: "aqara-climate-local"
-description: "Aqara T1 and WSDCGQ11LM temperature, humidity and pressure sensors: temperature, humidity, air pressure and battery percentage"
+description: "Aqara T1 and WSDCGQ11LM temperature, humidity and pressure sensors: temperature, humidity, air pressure with 3 hour trend and storm alert, and battery percentage"
 vendorSupportInformation: "https://github.com/Stoeckie"
 permissions:
   zigbee: {}
