@@ -22,7 +22,7 @@ preferences:
   - preferenceId: humidityOffset
     explicit: true
   - name: "stormDrop"
-    title: "Storm alert: pressure drop in 3 hours (hPa)"
+    title: "Storm alert: drop in 3 h (hPa)"
     description: "Alert goes to storm when the pressure falls at least this much in 3 hours. 3.6 = falling quickly in marine forecasts."
     required: false
     preferenceType: number
