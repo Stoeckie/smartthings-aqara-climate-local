@@ -18,6 +18,7 @@ SmartThings Edge driver for the Aqara temperature and humidity sensors that also
   * The trend starts after 2.5 hours of readings and survives a hub restart
 * Battery as a percentage: 2.6 V is empty and 3.0 V is full. It is read from the Aqara report the sensor sends about once an hour (exact to the mV). The 0.1 V steps of the standard battery report are only used when that report is missing.
 * Refresh
+* A value only goes to the hub when it changed; after a driver start every value is sent once so the app catches up
 * Everything works in routines
 
 ## Why

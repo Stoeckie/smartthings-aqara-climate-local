@@ -10,8 +10,9 @@ local data_types = require "st.zigbee.data_types"
 local log = require "log"
 local tlv = require "aqara_tlv"
 local ptrend = require "pressure_trend"
+local emitq = require "emitq"  -- only changed values go to the hub (see emitq.lua)
 
-local BUILD = "2026-11-08a"
+local BUILD = "2026-11-09a"
 local PRIVATE_CLUSTER = 0xFCC0
 local PRIVATE_ATTR_MODE = 0x0009
 local PRIVATE_ATTR_REPORT = 0x00F7
@@ -26,7 +27,7 @@ local TREND_ID = "silvervalley08660.pressureTrend"
 local function emit_battery(device, mv, source)
   local pct = tlv.battery_percent(mv)
   if not pct then return end
-  device:emit_event(capabilities.battery.battery(pct))
+  emitq.emit(device, capabilities.battery.battery(pct))
   if device:get_field("last_mv") ~= mv then
     device:set_field("last_mv", mv)
     log.info(string.format("[aqara] %s: battery %d mV = %d%% (%s)", device.label, mv, pct, source))
@@ -40,7 +41,7 @@ local function emit_pressure(device, kpa, precise)
   if precise then device:set_field("scaled_at", now)
   -- whole hPa (MeasuredValue, hourly report) only when the sensor sends no 0.1 hPa ScaledValue
   elseif now - (device:get_field("scaled_at") or 0) < 2 * 3600 then return end
-  device:emit_event(capabilities.atmosphericPressureMeasurement.atmosphericPressure({ value = kpa, unit = "kPa" }))
+  emitq.emit(device, capabilities.atmosphericPressureMeasurement.atmosphericPressure({ value = kpa, unit = "kPa" }))
   local list = ptrend.add(ptrend.decode(device:get_field("p_hist")), now, kpa * 10)
   device:set_field("p_hist", ptrend.encode(list), { persist = true })
   local dv = ptrend.change(list, now)
@@ -48,9 +49,9 @@ local function emit_pressure(device, kpa, precise)
   local drop = tonumber((device.preferences or {}).stormDrop) or 3.6
   pcall(function()
     local Trend = capabilities[TREND_ID]
-    device:emit_event(Trend.change({ value = dv, unit = "hPa" }))
-    device:emit_event(Trend.trend(ptrend.trend(dv)))
-    device:emit_event(Trend.alert(ptrend.alert(dv, drop)))
+    emitq.emit(device, Trend.change({ value = dv, unit = "hPa" }))
+    emitq.emit(device, Trend.trend(ptrend.trend(dv)))
+    emitq.emit(device, Trend.alert(ptrend.alert(dv, drop)))
   end)
   if device:get_field("last_trend") ~= ptrend.trend(dv) then
     device:set_field("last_trend", ptrend.trend(dv))
@@ -89,8 +90,8 @@ local function private_handler(_driver, device, value, _zb_rx)
   -- the same hourly report carries exact temperature (0.01 C) and humidity (0.01 %); the normal reports only come
   -- after a change of 0.5 C or 6 %, so these keep the values precise
   local c, rh = tlv.temperature_c(rec[0x64]), tlv.humidity_pct(rec[0x65])
-  if c then device:emit_event(capabilities.temperatureMeasurement.temperature({ value = c, unit = "C" })) end
-  if rh then device:emit_event(capabilities.relativeHumidityMeasurement.humidity(rh)) end
+  if c then emitq.emit(device, capabilities.temperatureMeasurement.temperature({ value = c, unit = "C" })) end
+  if rh then emitq.emit(device, capabilities.relativeHumidityMeasurement.humidity(rh)) end
   -- and the pressure in hPa (tag 0x66); the sensor rarely sends a separate pressure report
   emit_pressure(device, rec[0x66] and tlv.pressure_kpa(rec[0x66]))
 end
