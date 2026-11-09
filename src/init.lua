@@ -12,7 +12,7 @@ local tlv = require "aqara_tlv"
 local ptrend = require "pressure_trend"
 local emitq = require "emitq"  -- only changed values go to the hub (see emitq.lua)
 
-local BUILD = "2026-11-09a"
+local BUILD = "2026-11-09b"
 local PRIVATE_CLUSTER = 0xFCC0
 local PRIVATE_ATTR_MODE = 0x0009
 local PRIVATE_ATTR_REPORT = 0x00F7
@@ -38,7 +38,8 @@ end
 local function emit_pressure(device, kpa, precise)
   if not (kpa and kpa > 30 and kpa < 120) then return end
   local now = os.time()
-  if precise then device:set_field("scaled_at", now)
+  -- persisted: after a restart a whole-hPa value must not slip into the (persisted) 3 h history
+  if precise then device:set_field("scaled_at", now, { persist = true })
   -- whole hPa (MeasuredValue, hourly report) only when the sensor sends no 0.1 hPa ScaledValue
   elseif now - (device:get_field("scaled_at") or 0) < 2 * 3600 then return end
   emitq.emit(device, capabilities.atmosphericPressureMeasurement.atmosphericPressure({ value = kpa, unit = "kPa" }))
